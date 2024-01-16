@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myWeb.www.repository.BoardDAO">
+	<insert id="boardRegister">
+		insert into board (title, writer, content) values (#{title}, #{writer}, #{content})
+	</insert>
+	
+	<select id="selectOneBno" resultType="long">
+		select max(bno) from board;
+	</select>
+	
+	<update id="updateCommentQty">
+		update board b set cmt_qty = (select count(bno) from comment where bno = b.bno)
+	</update>
+	
+	<update id="updateFileQty">
+		update board b set has_file = (select count(bno) from file where bno = b.bno)
+	</update>
+	
+	<select id="boardList" resultType="com.myWeb.www.domain.BoardVO">
+		select * from board 
+		<include refid="search"/>
+		order by bno desc limit #{pageStart}, #{qty};
+	</select>
+	
+	<select id="boardDetail" resultType="com.myWeb.www.domain.BoardVO">
+		select * from board where bno = #{bno}
+	</select>
+	
+	<delete id="boardDelete">
+		delete from board where bno = #{bno}
+	</delete>
+	
+	<update id="boardModify">
+		update board set title = #{title}, content = #{content}, mod_date = now() where bno = #{bno}
+	</update>
+	
+	<update id="readCountIncrease">
+		update board set read_count = read_count + 1 where bno = #{bno}
+	</update>
+	
+	<select id="getTotalCount" resultType="int">
+		select count(*) from board <include refid="search"/>;
+	</select>
+	
+	<sql id="search">
+		<if test="type != null">
+			<trim prefix="where(" suffix=")" prefixOverrides="or">
+				<foreach collection="typeToArray" item="type">
+					<trim prefix="or">
+						<choose>
+							<when test="type== 't'.toString()">
+								title like concat('%', #{keyword}, '%')
+							</when>
+							<when test="type== 'w'.toString()">
+								writer like concat('%', #{keyword}, '%')
+							</when>
+							<when test="type== 'c'.toString()">
+								content like concat('%', #{keyword}, '%')
+							</when>
+						</choose>
+					</trim>
+				</foreach>
+			</trim>
+		</if>
+	</sql>
+</mapper>

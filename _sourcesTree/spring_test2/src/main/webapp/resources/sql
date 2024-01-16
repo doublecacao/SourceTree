@@ -1,0 +1,70 @@
+-- 2024-01-04
+DB생성
+1. USER생성 / DB생성
+CREATE DATABASE mywebdb;
+CREATE USER 'mywebUser'@'localhost' IDENTIFIED BY 'mysql';
+
+2. USER 권한 부여
+GRANT ALL PRIVILEGES ON mywebdb.* TO 'mywebUser'@'localhost' WITH GRANT OPTION;
+
+3. USER 권한 설정 확인
+FLUSH PRIVILEGES;
+
+-- 2024-01-05
+DB 테이블 생성
+1. board생성
+CREATE TABLE board(
+bno BIGINT NOT NULL AUTO_INCREMENT,
+title VARCHAR(200) NOT NULL,
+writer VARCHAR(100) NOT NULL,
+content TEXT NOT NULL,
+reg_date DATETIME DEFAULT NOW(),
+mod_date DATETIME DEFAULT NOW(),
+read_count INT DEFAULT 0,
+cmt_qty INT DEFAULT 0,
+has_file INT DEFAULT 0,
+PRIMARY KEY(bno));
+
+-- 2024-01-08
+DB 테이블 생성
+1. comment생성
+CREATE TABLE comment(
+cno BIGINT AUTO_INCREMENT,
+bno BIGINT NOT NULL,
+writer VARCHAR(100) NOT NULL,
+content TEXT NOT NULL,
+reg_date DATETIME DEFAULT NOW(),
+mod_date DATETIME DEFAULT NOW(),
+PRIMARY KEY(cno));
+
+-- 2024-01-10
+DB 테이블 생성
+1. file생성
+CREATE TABLE file(
+uuid VARCHAR(256) NOT NULL,
+save_dir VARCHAR(256) NOT NULL,
+file_name VARCHAR(256) NOT NULL,
+file_type TINYINT(1) DEFAULT 0,
+bno BIGINT,
+file_size BIGINT,
+reg_date DATETIME DEFAULT NOW(),
+PRIMARY KEY(uuid));
+
+-- 2024-01-12
+DB 테이블 생성
+멤버DB
+CREATE TABLE member(
+email VARCHAR(100) NOT NULL,
+pwd VARCHAR(1000) NOT NULL,
+nick_name VARCHAR(100) NOT NULL,
+reg_date DATETIME DEFAULT NOW(),
+last_login DATETIME DEFAULT NULL,
+PRIMARY KEY(email));
+
+하위 테이블 생성
+CREATE TABLE auth_member(
+email VARCHAR(100) NOT NULL,
+auth VARCHAR(50) NOT NULL);
+
+외래키 추가
+ALTER TABLE auth_member ADD FOREIGN KEY(email) REFERENCES member(email);
