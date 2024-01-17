@@ -18,7 +18,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @MapperScan(basePackages = {"com.myWeb.www.repository"})	//mapper경로 설정
-@ComponentScan(basePackages = {"com.myWeb.www.service"})	//service경로 설정
+@ComponentScan(basePackages = {"com.myWeb.www.service", "com.myWeb.www.exception"})	//service경로 설정
 @EnableTransactionManagement	//트랜잭션 허용 어노테이션
 @EnableScheduling	//스케쥴링 허용 어노테이션
 @Configuration		//설정파일 명시 어노테이션

@@ -18,7 +18,6 @@ import com.myWeb.www.security.LonginSuccessHandler;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Configuration
 @EnableWebSecurity
 //WebConfig에 SecurityConfig.class 등록*

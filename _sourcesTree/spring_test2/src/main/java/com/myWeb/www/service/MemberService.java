@@ -1,14 +1,14 @@
 package com.myWeb.www.service;
 
-import java.util.Collection;
 import java.util.List;
 
+import com.myWeb.www.domain.MemberDTO;
 import com.myWeb.www.security.AuthVO;
 import com.myWeb.www.security.MemberVO;
 
 public interface MemberService {
 
-	int memberRegister(MemberVO mvo);
+	int memberRegister(MemberDTO memberDTO);
 
 	boolean updateLastLogin(String authEmail);
 

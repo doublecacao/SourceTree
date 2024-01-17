@@ -6,6 +6,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.myWeb.www.domain.MemberDTO;
+import com.myWeb.www.repository.FileDAO;
 import com.myWeb.www.repository.MemberDAO;
 import com.myWeb.www.security.AuthVO;
 import com.myWeb.www.security.MemberVO;
@@ -19,12 +21,22 @@ public class MemberServiceImpl implements MemberService{
 	@Inject
 	private MemberDAO mdao;
 	
+	@Inject
+	private FileDAO fdao;
+	
 	@Override
-	public int memberRegister(MemberVO mvo) {
+	public int memberRegister(MemberDTO mdto) {
 		log.info("register service impl");
-		mdao.memberRegister(mvo);
+		mdao.memberRegister(mdto.getMvo());
 		
-		return mdao.registerAuthInit(mvo.getEmail());
+		if(mdto.getFvo() == null) {
+			return mdao.registerAuthInit(mdto.getMvo().getEmail());
+		}else {
+			int isOk = fdao.registerFile(mdto.getFvo());
+			log.info("memberProfile register >>> {}", isOk > 0?"성공":"실패");
+		}
+		
+		return mdao.registerAuthInit(mdto.getMvo().getEmail());
 	}
 
 	@Override

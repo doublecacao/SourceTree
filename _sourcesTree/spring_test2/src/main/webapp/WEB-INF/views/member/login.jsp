@@ -19,7 +19,7 @@
 						<c:set value="관리자에게 문의해주세요." var="errorText"></c:set>
 					</c:otherwise>
 				</c:choose>
-				${errorText }
+				${param.errorMsg }
 			</div>
 		</c:if>
 		<div class="mb-3">
@@ -34,7 +34,6 @@
 		<button type="submit" class="btn btn-primary">로그인</button>
 	</form>
 </div>
-
 
 </html>
 <jsp:include page="../layout/footer.jsp"/>

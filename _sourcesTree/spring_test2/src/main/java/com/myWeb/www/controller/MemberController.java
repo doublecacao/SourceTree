@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,8 +17,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.myWeb.www.domain.FileVO;
+import com.myWeb.www.domain.MemberDTO;
+import com.myWeb.www.handler.ProfileHandler;
 import com.myWeb.www.security.MemberVO;
 import com.myWeb.www.service.MemberService;
 
@@ -33,15 +37,24 @@ public class MemberController {
 	private MemberService msv;
 	
 	@Inject
+	private ProfileHandler ph;
+	
+	@Inject
 	private BCryptPasswordEncoder bcEncoder;
 	
 	@GetMapping("/register")
 	public void register() {}
 	
 	@PostMapping("/register")
-	public String register(MemberVO mvo, RedirectAttributes re) {
+	public String register(MemberVO mvo, RedirectAttributes re, @RequestParam(value = "files", required = false) MultipartFile file) {
 		log.info("register mvo >>> {}", mvo);
+		FileVO fvo = null;
 		
+		if(file.getSize() > 0) {
+			fvo = ph.uploadProfile(file, mvo);
+		}
+		
+		//기존 회원들의 id및 pwd정보를 가져와서 신규 회원과 중복되는지 비교
 		List<MemberVO> mvoList = new ArrayList<MemberVO>(msv.mvoList());
 		
 		if(mvo.getPwd() == null || mvo.getPwd() == "") {
@@ -58,7 +71,7 @@ public class MemberController {
 		}
 		
 		mvo.setPwd(bcEncoder.encode(mvo.getPwd()));
-		int isOk = msv.memberRegister(mvo);
+		int isOk = msv.memberRegister(new MemberDTO(mvo, fvo));
 		
 		log.info("encPwd >>> {}", mvo.getPwd());
 		

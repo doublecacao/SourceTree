@@ -2,12 +2,13 @@ package com.myWeb.www.repository;
 
 import java.util.List;
 
+import com.myWeb.www.domain.MemberDTO;
 import com.myWeb.www.security.AuthVO;
 import com.myWeb.www.security.MemberVO;
 
 public interface MemberDAO {
 
-	int memberRegister(MemberVO mvo);
+	int memberRegister(MemberVO memberVO);
 
 	int registerAuthInit(String email);
 
