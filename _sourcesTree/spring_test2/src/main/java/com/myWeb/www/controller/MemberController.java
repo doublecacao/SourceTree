@@ -56,7 +56,7 @@ public class MemberController {
 		
 		//기존 회원들의 id및 pwd정보를 가져와서 신규 회원과 중복되는지 비교
 		List<MemberVO> mvoList = new ArrayList<MemberVO>(msv.mvoList());
-		
+		int test = 0;
 		if(mvo.getPwd() == null || mvo.getPwd() == "") {
 			re.addFlashAttribute("pwdCheck", "1");
 			
