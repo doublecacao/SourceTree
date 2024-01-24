@@ -68,3 +68,6 @@ auth VARCHAR(50) NOT NULL);
 
 외래키 추가
 ALTER TABLE auth_member ADD FOREIGN KEY(email) REFERENCES member(email);
+
+-- 2024-01-18
+alter table file add file_extention VARCHAR(10) NOT NULL;

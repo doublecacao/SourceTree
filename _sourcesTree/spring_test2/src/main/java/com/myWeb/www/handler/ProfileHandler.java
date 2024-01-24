@@ -35,7 +35,9 @@ public class ProfileHandler {
 		//files 객체에 대한 설정
 
 			FileVO fvo = new FileVO();
-			fvo.setSaveDir(id);
+			String originalFileName = file.getOriginalFilename();
+			fvo.setFileExtention(originalFileName.substring(originalFileName.lastIndexOf(".")));
+			fvo.setSaveDir("_profile"+File.separator+id);
 			fvo.setFileSize(file.getSize());
 			fvo.setFileName(id);
 			
@@ -43,7 +45,7 @@ public class ProfileHandler {
 			fvo.setUuid(uuid);
 			// -------------------- 기본 fvo setting 완료
 			
-			File storeFile = new File(folder, id);
+			File storeFile = new File(folder, fvo.getUuid()+fvo.getFileName()+fvo.getFileExtention());
 			//실제 파일이 저장되려면 첫 경로부터 다 설정되어 있어야 한다
 			//D:\\SONG\\_myProject\\_java\\_fileUpload\\email\\uuid_fileName.jpg
 			
@@ -54,8 +56,8 @@ public class ProfileHandler {
 				if(isImageFile(storeFile)) {
 					fvo.setFileType(1);	//이미지파일은 타입이 1
 					//썸네일 생성
-					File profile = new File(folder, uuid+"_profile_"+id);
-					Thumbnails.of(storeFile).size(500, 500).toFile(profile);
+					File profile = new File(folder, uuid+"_profile_"+fvo.getFileName()+fvo.getFileExtention());
+					Thumbnails.of(storeFile).size(300, 300).toFile(profile);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -63,6 +65,21 @@ public class ProfileHandler {
 			}
 			
 		return fvo;
+	}
+	
+	public int fileRemover(String DEL_DIR) {
+		String path = UP_DIR+"\\"+DEL_DIR;	//_profile+\\+email
+		File deleteFile = new File(path);
+		
+		if(deleteFile.exists()) {	//파일 유/무 확인
+			File[] deleteFileList = deleteFile.listFiles();	//파일 배열화
+			
+			for(File deleteFiles : deleteFileList) {
+				deleteFiles.delete();	//해당 폴더 내부 파일 지우기
+			}
+				deleteFile.delete();		//해당 아이디 폴더 삭제
+		}
+		return 1;						//성공/실패 리턴
 	}
 	
 	//이미지인지 확인하는 메서드 생성

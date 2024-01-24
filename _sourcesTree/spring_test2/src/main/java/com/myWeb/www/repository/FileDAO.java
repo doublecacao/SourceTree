@@ -19,4 +19,10 @@ public interface FileDAO {
 
 	List<FileVO> selectList();
 
+	FileVO getFile(String email);
+
+	int deleteProfile(String email);
+
+	String getFileDir(String email);
+
 }

@@ -7,16 +7,16 @@
 <div class="container-md">
     <h2>회원정보 수정</h2>
     
-<form action="/member/modify" method="post">
+<form action="/member/modify" method="post" enctype="multipart/form-data">
 <!-- name이 중요하다 -->
 <%--     <s:authentication property="principal.mvo.email" var="authEmail"/>
     <s:authentication property="principal.mvo.nickName" var="authNick"/> --%>
 	<div class="col-12">
 		<c:choose>
-			<c:when test="${bdto.fvo.fileType eq 1 }">
+			<c:when test="${mdto.fvo.fileType eq 1 }">
 				<div>
 				<!-- /upload/save_dir/(여기까지 경로)uuid_file_name(파일명) -->
-					<img alt="" src="/upload/${bdto.fvo.saveDir }/${bdto.fvo.uuid}_profile_${bdto.mvo.email}.png">
+					<img alt="" src="/upload/${mdto.fvo.saveDir }/${mdto.fvo.uuid}_profile_${mdto.fvo.fileName}${mdto.fvo.fileExtention}">
 					<%-- <img alt="" class="img-fluid" src="/upload/${f:replace(bdto.flist.save_dir, '\\', '/') }/${bdto.flist.uuid}_th_${bdto.flist.file_name}"> --%>
 				</div>
 			</c:when>
@@ -32,8 +32,12 @@
 		</c:choose>
 		</div>
 	<div class="mb-3">
+	  	<label for="files" class="form-label"></label>
+	  	<input type="file" class="form-control" name="files" id="files" placeholder="files..." style="border-radius: 5px, 5px, 5px, 5px;"></input><br>
+	</div>
+	<div class="mb-3">
 	  <label for="email" class="form-label">이메일</label>
-	  <input type="email" name="email" class="form-control" id="email" value="${bdto.mvo.email }" readonly="readonly">
+	  <input type="email" name="email" class="form-control" id="email" value="${mdto.mvo.email }" readonly="readonly">
 	</div>
 	<div class="mb-3">
 	  <label for="pwd" class="form-label">비밀번호</label>
@@ -41,18 +45,19 @@
 	</div>
 	<div class="mb-3">
 	  <label for="nickName" class="form-label">닉네임</label>
-	  <input type="text" name="nickName" class="form-control" id="nickName" value="${bdto.mvo.nickName }">
+	  <input type="text" name="nickName" class="form-control" id="nickName" value="${mdto.mvo.nickName }">
 	</div>
 	
 	<!-- 해당 멤버의 권한을 출력 -->
 	<h3>권한 목록</h3>
 	<c:forEach items="${mvoAuth }" var="mvoAuth">
 		<hr>
-		<h5><a href="/member/auth">${mvoAuth.auth }</a></h5>
+		<h5>${mvoAuth.auth }</h5>
 	</c:forEach>
     
-    <button type="submit" class="btn btn-primary">수정</button>
-    <a href="/member/delete?email=${bdto.mvo.email }"><button type="button" class="btn btn-danger">탈퇴</button></a>
+    <button type="submit" id="regBtn" class="btn btn-primary">수정</button>
+    <a href="/member/delete?email=${mdto.mvo.email }"><button type="button" class="btn btn-danger">탈퇴</button></a>
 </form>
 </div>
+<script src="/resources/js/memberRegister.js"></script>
 <jsp:include page="../layout/footer.jsp"/>

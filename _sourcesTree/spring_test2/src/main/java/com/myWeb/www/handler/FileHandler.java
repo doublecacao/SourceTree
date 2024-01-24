@@ -45,6 +45,7 @@ public class FileHandler {
 			String originalFileName = file.getOriginalFilename();
 			String fileName = originalFileName.substring(originalFileName.lastIndexOf(File.separator)+1);
 			log.info("fileName >>> {}", fileName);
+			fvo.setFileExtention(originalFileName.substring(originalFileName.lastIndexOf(".")));
 			fvo.setFileName(fileName);
 			
 			String uuid = UUID.randomUUID().toString();

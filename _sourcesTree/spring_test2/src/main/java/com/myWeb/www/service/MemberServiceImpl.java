@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.myWeb.www.domain.FileVO;
 import com.myWeb.www.domain.MemberDTO;
 import com.myWeb.www.repository.FileDAO;
 import com.myWeb.www.repository.MemberDAO;
@@ -54,10 +55,19 @@ public class MemberServiceImpl implements MemberService{
 	}
 
 	@Override
-	public int modify(MemberVO mvo) {
+	public int modify(MemberDTO mdto) {
 		log.info("modify service impl");
 		
-		return mdao.modify(mvo);
+		if(mdto.getFvo() == null) {
+			return mdao.modify(mdto.getMvo());
+		}else {
+			int isOk = fdao.deleteProfile(mdto.getMvo().getEmail());
+			isOk = fdao.registerFile(mdto.getFvo());
+			
+			log.info("memberProfile modify >>> {}", isOk > 0?"성공":"실패");
+		}
+		
+		return mdao.modify(mdto.getMvo());
 	}
 
 	@Override
@@ -77,9 +87,24 @@ public class MemberServiceImpl implements MemberService{
 	@Override
 	public int delete(String email) {
 		log.info("delete service impl");
+		fdao.deleteProfile(email);
 		mdao.deleteAuth(email);
 		
 		return mdao.delete(email);
+	}
+
+	@Override
+	public FileVO getFile(String email) {
+		log.info("getFile service impl");
+		
+		return fdao.getFile(email);
+	}
+
+	@Override
+	public String getFileDir(String email) {
+		log.info("getFileDir service impl");
+		
+		return fdao.getFileDir(email);
 	}
 
 }

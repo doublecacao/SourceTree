@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse.File;
 import com.myWeb.www.domain.FileVO;
 import com.myWeb.www.domain.MemberDTO;
 import com.myWeb.www.handler.ProfileHandler;
@@ -77,7 +79,7 @@ public class MemberController {
 		
 		log.info("memberRegister >>> {}", isOk>0?"성공":"실패");
 		
-		return "index";
+		return "redirect:/";
 	}
 	
 	@GetMapping("/login")
@@ -105,42 +107,76 @@ public class MemberController {
 //		m.addAttribute("mvoAuth", msv.selectAuth(email));
 //	}
 	
+	@Transactional
 	@GetMapping("/modify")
 	public void modify(MemberVO mvo, Model m) {
 		log.info("modifyMvo >>> {}", mvo);
 		
 		String email = mvo.getEmail();
 		
-		m.addAttribute("mvo", msv.detail(email));
+		mvo = msv.detail(email);
+		FileVO fvo = msv.getFile(email);
+		
+		log.info("mvo >>> {}", mvo);
+		log.info("fvo >>> {}", fvo);
+		
+		MemberDTO mdto = new MemberDTO(mvo, fvo);
+		
+		m.addAttribute("mdto", mdto);
 		m.addAttribute("mvoAuth", msv.selectAuth(email));
 	}
 	
 	@PostMapping("/modify")
-	public String modify(MemberVO mvo, HttpServletRequest request, HttpServletResponse response, Principal p) {
+	public String modify(MemberVO mvo, HttpServletRequest request, HttpServletResponse response, Principal p, @RequestParam(name="files", required = false) MultipartFile file) {
 		log.info("modify mvo >>> {}", mvo);
 		
-		if(mvo.getPwd() == null || mvo.getPwd().equals("")) {
-			MemberVO Originmvo = msv.detail(mvo.getEmail());
+		FileVO profile = null;
+		
+		if(mvo.getPwd().equals(null) || mvo.getPwd().equals("")) {	//비밀번호가 null이거나 비어있을때
+			if(file.getSize() > 0) {	//사진을 변경했을때
+				
+				ProfileHandler ph = new ProfileHandler();
+				
+				ph.fileRemover(msv.getFileDir(mvo.getEmail()));
+				profile = ph.uploadProfile(file, mvo);
+			}
 			
-			mvo.setPwd(Originmvo.getPwd());
+			MemberVO Originmvo = msv.detail(mvo.getEmail());	//기존 비밀번호 db에서 가져오기
+			mvo.setPwd(Originmvo.getPwd());	//기존 비밀번호 적용
 			
-			int isOk = msv.modify(mvo);
+			MemberDTO mdto = new MemberDTO(mvo, profile);
+			int isOk = msv.modify(mdto);
 			log.info("modify >>> {}", isOk>0?"성공":"실패");
 			
-			return "redirect:index";
+			if(p.getName().equals(mvo.getEmail())) {	//로그인중인 계정의 이메일과 수정한 이메일이 같을 때
+				Authentication authentication = SecurityContextHolder
+						.getContext().getAuthentication();
+				new SecurityContextLogoutHandler().logout(request, response, authentication);
+			}
+			return "redirect:/";
 		}
-		mvo.setPwd(bcEncoder.encode(mvo.getPwd()));
 		
-		int isOk = msv.modify(mvo);
+		if(file.getSize() > 0) {
+			ProfileHandler ph = new ProfileHandler();
+			
+			ph.fileRemover(msv.getFileDir(mvo.getEmail()));
+			
+			profile = ph.uploadProfile(file, mvo);
+		}
+		mvo.setPwd(bcEncoder.encode(mvo.getPwd()));	//신규 비밀번호 인코딩
+		
+		MemberDTO mdto = new MemberDTO(mvo, profile);
+		
+		int isOk = msv.modify(mdto);
 		log.info("modify >>> {}", isOk>0?"성공":"실패");
 		
-		if(p.getName().equals(mvo.getEmail())) {
+		if(p.getName().equals(mvo.getEmail())) {	//로그아웃
 			Authentication authentication = SecurityContextHolder
 					.getContext().getAuthentication();
 			new SecurityContextLogoutHandler().logout(request, response, authentication);
 		}
 		
-		return "redirect:index";
+		return "redirect:/";
 	}
 	
 	@GetMapping("/list")
@@ -151,14 +187,23 @@ public class MemberController {
 	}
 	
 	@GetMapping("/delete")
-	public String delete(MemberVO mvo) {
+	public String delete(MemberVO mvo, Principal p, HttpServletRequest request, HttpServletResponse response) {
 		log.info("deleteMvo >>> {}", mvo);
+		ProfileHandler ph = new ProfileHandler();
 		
-		int isOk = msv.delete(mvo.getEmail());
+		int isOk = ph.fileRemover(msv.getFileDir(mvo.getEmail()));
+		isOk = msv.delete(mvo.getEmail());
+		
+		if(p.getName().equals(mvo.getEmail())) {
+			Authentication authentication = SecurityContextHolder
+					.getContext().getAuthentication();
+			new SecurityContextLogoutHandler().logout(request, response, authentication);
+		}
+
 		
 		log.info("delete >>> {}", isOk>0?"성공":"실패");
 		
-		return "index";
+		return "redirect:/member/list";
 	}
 	
 }

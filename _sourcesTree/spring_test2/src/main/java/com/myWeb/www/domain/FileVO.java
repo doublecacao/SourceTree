@@ -19,4 +19,5 @@ public class FileVO {
 	private long bno;
 	private long fileSize;
 	private String regDate;
+	private String fileExtention;
 }
